@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,14 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
 @Slf4j
 public class UserController {
-   @Autowired
+    @Autowired
     private UserService userService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostMapping("/sendMsg")
     public R<String> sendMsg(@RequestBody User user, HttpSession httpSession){
@@ -40,7 +44,7 @@ public class UserController {
 //            SMSUtils.sendMessage("测试","",phone,code);
 
         //存起来
-            httpSession.setAttribute(phone,code);
+            redisTemplate.opsForValue().set(phone,code,5, TimeUnit.MINUTES);
             return R.success("短信发送成功");
         }
 
@@ -56,7 +60,8 @@ public class UserController {
 
         String code = map.get("code").toString();
 
-        Object attribute = session.getAttribute(phone);
+//        Object attribute = session.getAttribute(phone);
+        Object attribute = redisTemplate.opsForValue().get(phone);
 
         if(attribute!=null && attribute.equals(code)){
 
@@ -75,6 +80,7 @@ public class UserController {
             }
 
             session.setAttribute("user",user.getId());
+            redisTemplate.delete(phone);
             return R.success(user);
         }
 
