@@ -14,10 +14,10 @@ import java.io.IOException;
 /**
  * 用户是否已经完成登录
  */
-@WebFilter(filterName = "loginCheckFilter",urlPatterns = "/*")
+@WebFilter(filterName = "loginCheckFilter", urlPatterns = "/*")
 public class LoginCheckFilter implements Filter {
 
-//    路径匹配器
+    //    路径匹配器
     public static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     @Override
@@ -32,38 +32,42 @@ public class LoginCheckFilter implements Filter {
 
         String requestURI = request.getRequestURI();
         String[] urls = new String[]{
-          "/employee/login",
-          "/employee/logout",
-          "/backend/**",
-          "/front/**",
+                "/employee/login",
+                "/employee/logout",
+                "/backend/**",
+                "/front/**",
                 "/user/sendMsg",
-           "/user/login"
+                "/user/login",
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
 
 
         boolean check = check(urls, requestURI);
 
-        if (check){
-            filterChain.doFilter(request,response);
+        if (check) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-        if (request.getSession().getAttribute("employee") != null){
+        if (request.getSession().getAttribute("employee") != null) {
             Long id = (Long) request.getSession().getAttribute("employee");
 
             BaseContext.setCurrentId(id);
 
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request, response);
 
             return;
         }
 
-        if (request.getSession().getAttribute("user") != null){
+        if (request.getSession().getAttribute("user") != null) {
             Long Userid = (Long) request.getSession().getAttribute("user");
 
             BaseContext.setCurrentId(Userid);
 
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request, response);
 
             return;
         }
@@ -76,10 +80,10 @@ public class LoginCheckFilter implements Filter {
         Filter.super.destroy();
     }
 
-    public boolean check(String[] urls,String requestURI){
+    public boolean check(String[] urls, String requestURI) {
         for (String url : urls) {
             boolean match = PATH_MATCHER.match(url, requestURI);
-            if (match){
+            if (match) {
                 return true;
             }
         }
