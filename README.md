@@ -7,7 +7,7 @@
 
 直接运行OrderApplication
 
-# Order Discription
+# Order Description
 
 - 前端采用Vue,ElementUi
 - 后端采用Springboot,Redis
